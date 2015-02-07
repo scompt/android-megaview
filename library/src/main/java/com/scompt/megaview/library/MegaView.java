@@ -3,7 +3,10 @@ package com.scompt.megaview.library;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.os.Build;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.LayoutRes;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
@@ -96,9 +99,17 @@ public class MegaView<T, U extends MegaView.ViewHolder> extends FrameLayout {
         this.mDebug = debug;
     }
 
-    public void setData(Func1<Integer, Observable<T>> pageFunction, ViewBinder<T, U> binder) {
-        this.pageFunction = pageFunction;
+    public void setBinder(ViewBinder<T, U> binder) {
         this.binder = binder;
+    }
+
+    public void setDataHolder(ArrayList<T> items) {
+        if (mDebug) Log.d(LOG_TAG, String.format("setDataHolder(%s)", items));
+        this.mItems = items;
+    }
+
+    public void setDataSource(Func1<Integer, Observable<T>> pageFunction) {
+        this.pageFunction = pageFunction;
     }
 
     public void reload() {
@@ -423,5 +434,107 @@ public class MegaView<T, U extends MegaView.ViewHolder> extends FrameLayout {
         emptyView.setVisibility(GONE);
         addView(emptyView, LAYOUT_PARAMS);
 //        this.rowNoConnectionLayout = rowNoConnectionLayout;
+    }
+
+    @Override
+    protected Parcelable onSaveInstanceState() {
+        Parcelable superState = super.onSaveInstanceState();
+
+        SavedState ss = new SavedState(superState);
+        ss.page = mCurrentPage;
+        ss.loading = mLoading;
+//        ss.loaded = loaded
+//        ss.empty =
+//        ss.error = errorView
+        ss.connected = mConnected;
+        ss.reachedEnd = mReachedEnd;
+        return ss;
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Parcelable state) {
+        SavedState ss = (SavedState) state;
+
+        super.onRestoreInstanceState(ss.getSuperState());
+
+        mCurrentPage = ss.page;
+        mLoading = ss.loading;
+//        ss.loaded = loaded
+//        ss.empty =
+//        ss.error = errorView
+        mConnected = ss.connected;
+        mReachedEnd = ss.reachedEnd;
+    }
+
+    static class SavedState extends BaseSavedState {
+
+        int page;
+        boolean loading;
+        boolean loaded;
+        boolean empty;
+        boolean error;
+        boolean connected;
+        boolean reachedEnd;
+
+        public SavedState(Parcel source) {
+            super(source);
+            page = source.readInt();
+
+            // TODO: Could check here to make sure the count of items is the same as when view state was saved
+
+            byte stateFlags = source.readByte();
+            loading =    (stateFlags & 0b00000001) != 0;
+            loaded =     (stateFlags & 0b00000010) != 0;
+            empty =      (stateFlags & 0b00000100) != 0;
+            error =      (stateFlags & 0b00001000) != 0;
+            connected =  (stateFlags & 0b00010000) != 0;
+            reachedEnd = (stateFlags & 0b00100000) != 0;
+        }
+
+        public SavedState(Parcelable superState) {
+            super(superState);
+        }
+
+        @Override
+        public void writeToParcel(@NonNull Parcel dest, int flags) {
+            super.writeToParcel(dest, flags);
+            dest.writeInt(page);
+
+            byte stateFlags = (byte) (
+                    (loading ?    0b00000001 : 0) |
+                    (loaded ?     0b00000010 : 0) |
+                    (empty ?      0b00000100 : 0) |
+                    (error ?      0b00001000 : 0) |
+                    (connected ?  0b00010000 : 0) |
+                    (reachedEnd ? 0b00100000 : 0)
+                    );
+            dest.writeByte(stateFlags);
+        }
+
+        @Override
+        public String toString() {
+            return "MegaView.SavedState{" +
+                    "page=" + page +
+                    ", loading=" + loading +
+                    ", loaded=" + loaded +
+                    ", empty=" + empty +
+                    ", error=" + error +
+                    ", connected=" + connected +
+                    ", reachedEnd=" + reachedEnd +
+                    '}';
+        }
+
+        public static final Parcelable.Creator<SavedState> CREATOR
+                = new Parcelable.Creator<SavedState>() {
+            @Override
+            public SavedState createFromParcel(Parcel in) {
+                return new SavedState(in);
+            }
+
+            @Override
+            public SavedState[] newArray(int size) {
+                return new SavedState[size];
+            }
+        };
     }
 }

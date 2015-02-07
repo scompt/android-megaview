@@ -3,6 +3,7 @@ package com.scompt.megaview.sample;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RadioGroup;
@@ -12,6 +13,7 @@ import android.widget.ToggleButton;
 import com.scompt.megaview.R;
 import com.scompt.megaview.library.MegaView;
 
+import java.util.ArrayList;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
@@ -22,6 +24,8 @@ import rx.Observable;
 import rx.functions.Func1;
 
 public class MyActivity extends Activity {
+
+    private static final String STRINGS_STATE_KEY = "Strings_State";
 
     @InjectView(R.id.megaview)
     MegaView<String, RowViewHolder> megaView;
@@ -49,6 +53,7 @@ public class MyActivity extends Activity {
 
     @InjectView(R.id.connectivity_group)
     RadioGroup mConnectivityGroup;
+    private ArrayList<String> strings = new ArrayList<>();
 
     private Observable<String> getContentObservable(int page) {
         if (mEmptyResponse.isChecked()) {
@@ -128,13 +133,7 @@ public class MyActivity extends Activity {
                     }
                 });
 
-        megaView.setData(new Func1<Integer,
-                Observable<String>>() {
-            @Override
-            public Observable<String> call(Integer integer) {
-                return getDelayedObservable(getContentObservable(integer));
-            }
-        }, new MegaView.ViewBinder<String, RowViewHolder>() {
+        megaView.setBinder(new MegaView.ViewBinder<String, RowViewHolder>() {
             @Override
             public RowViewHolder onCreateViewHolder(ViewGroup parent) {
                 return new RowViewHolder(new TextView(MyActivity.this));
@@ -149,17 +148,35 @@ public class MyActivity extends Activity {
                         TextView textView = (TextView) v;
                         Intent intent = new Intent(MyActivity.this, SecondActivity.class);
                         intent.putExtra(SecondActivity.LABEL_EXTRA, textView.getText());
+                        // TODO: Play with activity transitions
                         startActivity(intent);
                     }
                 });
             }
         });
-
         megaView.setConnected(mConnected.isChecked());
+        megaView.setDataSource(new Func1<Integer, Observable<String>>() {
+            @Override
+            public Observable<String> call(Integer integer) {
+                return getDelayedObservable(getContentObservable(integer));
+            }
+        });
+
+        if (savedInstanceState != null && savedInstanceState.containsKey(STRINGS_STATE_KEY)) {
+            strings = savedInstanceState.getStringArrayList(STRINGS_STATE_KEY);
+        }
+
+        megaView.setDataHolder(strings);
 
         if (savedInstanceState == null) {
             megaView.reload();
         }
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putStringArrayList(STRINGS_STATE_KEY, strings);
     }
 
     protected static class RowViewHolder extends MegaView.ViewHolder {
