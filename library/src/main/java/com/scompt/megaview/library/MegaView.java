@@ -19,7 +19,6 @@ import android.widget.ProgressBar;
 import com.scompt.library.R;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import rx.Observable;
@@ -30,17 +29,18 @@ import rx.schedulers.Schedulers;
 
 public class MegaView<T, U extends MegaView.ViewHolder> extends FrameLayout {
 
+    private static final String LOG_TAG = MegaView.class.getSimpleName();
+
     private static final int ITEM_TYPE_ROW = 0;
     private static final int ITEM_TYPE_PROGRESS = 1;
-    private static final String LOG_TAG = MegaView.class.getSimpleName();
-    private final Func1<Integer, Observable<List<T>>> EMPTY_FUNCTION = new Func1<Integer, Observable<List<T>>>() {
+    private final Func1<Integer, Observable<T>> EMPTY_FUNCTION = new Func1<Integer, Observable<T>>() {
         @Override
-        public Observable<List<T>> call(Integer integer) {
-            return Observable.just(Collections.<T>emptyList());
+        public Observable<T> call(Integer integer) {
+            return Observable.empty();
         }
     };
 
-    private Func1<Integer, Observable<List<T>>> pageFunction = EMPTY_FUNCTION;
+    private Func1<Integer, Observable<T>> pageFunction = EMPTY_FUNCTION;
     private ViewBinder<T, U> binder;
 
     private ArrayList<T> mItems = new ArrayList<>();
@@ -96,7 +96,7 @@ public class MegaView<T, U extends MegaView.ViewHolder> extends FrameLayout {
         this.mDebug = debug;
     }
 
-    public void setData(Func1<Integer, Observable<List<T>>> pageFunction, ViewBinder<T, U> binder) {
+    public void setData(Func1<Integer, Observable<T>> pageFunction, ViewBinder<T, U> binder) {
         this.pageFunction = pageFunction;
         this.binder = binder;
     }
@@ -166,7 +166,7 @@ public class MegaView<T, U extends MegaView.ViewHolder> extends FrameLayout {
         post(runnable);
     }
 
-    private class MySubscriber extends Subscriber<List<T>> {
+    private class MySubscriber extends Subscriber<T> {
         private List<T> mItemsToAdd = new ArrayList<>();
 
         @Override
@@ -188,7 +188,7 @@ public class MegaView<T, U extends MegaView.ViewHolder> extends FrameLayout {
                 mItems.addAll(mItemsToAdd);
                 adapter.notifyItemRangeInserted(position, count);
             }
-            Log.v("asdf", "completed");
+            Log.v(LOG_TAG, "completed");
         }
 
         @Override
@@ -199,12 +199,12 @@ public class MegaView<T, U extends MegaView.ViewHolder> extends FrameLayout {
                 showError();
             }
 
-            Log.v("asdf", "error: " + e.getMessage(), e);
+            Log.v(LOG_TAG, "error: " + e.getMessage(), e);
         }
 
         @Override
-        public void onNext(List<T> t) {
-            mItemsToAdd.addAll(t);
+        public void onNext(T t) {
+            mItemsToAdd.add(t);
         }
     }
 
@@ -290,25 +290,23 @@ public class MegaView<T, U extends MegaView.ViewHolder> extends FrameLayout {
     }
 
     private void onStartLoading() {
-        Log.v("asdf", "onStartLoading");
-        Runnable runnable = new Runnable() {
+        Log.v(LOG_TAG, "onStartLoading");
+        post(new Runnable() {
             public void run() {
                 mLoading = true;
                 adapter.notifyItemInserted(mItems.size());
             }
-        };
-        post(runnable);
+        });
     }
 
     private void onStopLoading() {
-        Log.v("asdf", "onStopLoading");
-        Runnable runnable = new Runnable() {
+        Log.v(LOG_TAG, "onStopLoading");
+        post(new Runnable() {
             public void run() {
                 mLoading = false;
                 adapter.notifyItemRemoved(mItems.size());
             }
-        };
-        post(runnable);
+        });
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {

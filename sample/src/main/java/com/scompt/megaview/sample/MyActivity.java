@@ -3,7 +3,6 @@ package com.scompt.megaview.sample;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RadioGroup;
@@ -13,7 +12,6 @@ import android.widget.ToggleButton;
 import com.scompt.megaview.R;
 import com.scompt.megaview.library.MegaView;
 
-import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
@@ -52,7 +50,7 @@ public class MyActivity extends Activity {
     @InjectView(R.id.connectivity_group)
     RadioGroup mConnectivityGroup;
 
-    private Observable<List<String>> getContentObservable(int page) {
+    private Observable<String> getContentObservable(int page) {
         if (mEmptyResponse.isChecked()) {
             return Observable.empty();
         } else {
@@ -61,14 +59,14 @@ public class MyActivity extends Activity {
                 public String call(Integer integer) {
                     return String.valueOf(integer);
                 }
-            }).toList();
+            });
         }
     }
 
     private static final Random RANDOM = new Random();
 
-    private Observable<List<String>> getDelayedObservable(Observable<List<String>> in) {
-        Observable<List<String>> delayed;
+    private Observable<String> getDelayedObservable(Observable<String> in) {
+        Observable<String> delayed;
 
         if (mImmediateResponse.isChecked()) {
             delayed = in;
@@ -82,11 +80,10 @@ public class MyActivity extends Activity {
             delayed = in.delay(delay, TimeUnit.MILLISECONDS);
         }
 
-        Log.v("asdf", "checked: " + mErrorButton + mErrorButton.isChecked());
         if (mErrorButton.isChecked()) {
-            return delayed.flatMap(new Func1<List<String>, Observable<List<String>>>() {
+            return delayed.flatMap(new Func1<String, Observable<String>>() {
                 @Override
-                public Observable<List<String>> call(List<String> strings) {
+                public Observable<String> call(String strings) {
                     return Observable.error(new Exception());
                 }
             });
@@ -132,9 +129,9 @@ public class MyActivity extends Activity {
                 });
 
         megaView.setData(new Func1<Integer,
-                Observable<List<String>>>() {
+                Observable<String>>() {
             @Override
-            public Observable<List<String>> call(Integer integer) {
+            public Observable<String> call(Integer integer) {
                 return getDelayedObservable(getContentObservable(integer));
             }
         }, new MegaView.ViewBinder<String, RowViewHolder>() {
