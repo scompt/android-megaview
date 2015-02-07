@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="MegaView">
+        <attr name="pagination" format="boolean"/>
+        <attr name="pullToRefresh" format="boolean"/>
+    </declare-styleable>
+</resources>

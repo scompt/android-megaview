@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+        <RadioGroup android:id="@+id/delay_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:orientation="horizontal"
+            android:background="@android:color/holo_red_dark"
+            >
+
+            <ToggleButton android:id="@+id/immediate_response"
+                android:layout_height="wrap_content"
+                android:layout_width="fill_parent"
+                android:layout_weight="1"
+                android:textSize="14sp"
+                android:textOn="Immediate"
+                android:textOff="Immediate"
+                android:checked="true"
+                />
+            <ToggleButton android:id="@+id/short_delay_response"
+                android:layout_height="wrap_content"
+                android:layout_width="fill_parent"
+                android:layout_weight="1"
+                android:textSize="14sp"
+                android:textOn="Short Delay"
+                android:textOff="Short Delay"
+                />
+            <ToggleButton android:id="@+id/long_delay_response"
+                android:layout_height="wrap_content"
+                android:layout_width="fill_parent"
+                android:layout_weight="1"
+                android:textSize="14sp"
+                android:textOn="Long Delay"
+                android:textOff="Long Delay"
+                />
+        </RadioGroup>
+
+    <RadioGroup android:id="@+id/content_group"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_above="@id/delay_group"
+        android:background="@android:color/holo_green_dark"
+        >
+
+        <ToggleButton android:id="@+id/success_response"
+            android:layout_height="wrap_content"
+            android:layout_width="fill_parent"
+            android:layout_weight="1"
+            android:textSize="14sp"
+            android:textOn="Success"
+            android:textOff="Success"
+            android:checked="true"
+            />
+        <ToggleButton android:id="@+id/error_response"
+            android:layout_height="wrap_content"
+            android:layout_width="fill_parent"
+            android:layout_weight="1"
+            android:textSize="14sp"
+            android:textOn="Error"
+            android:textOff="Error"
+            />
+        <ToggleButton android:id="@+id/empty_response"
+            android:layout_height="wrap_content"
+            android:layout_width="fill_parent"
+            android:layout_weight="1"
+            android:textSize="14sp"
+            android:textOn="Empty"
+            android:textOff="Empty"
+            />
+    </RadioGroup>
+
+    <RadioGroup android:id="@+id/connectivity_group"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_above="@id/content_group"
+        android:background="@android:color/holo_blue_dark"
+        >
+
+        <ToggleButton android:id="@+id/connected"
+            android:layout_height="wrap_content"
+            android:layout_width="fill_parent"
+            android:layout_weight="1"
+            android:textSize="14sp"
+            android:textOn="Connected"
+            android:textOff="Connected"
+            android:checked="true"
+            />
+        <ToggleButton android:id="@+id/disconnected"
+            android:layout_height="wrap_content"
+            android:layout_width="fill_parent"
+            android:layout_weight="1"
+            android:textSize="14sp"
+            android:textOn="Disconnected"
+            android:textOff="Disconnected"
+            />
+    </RadioGroup>
+
+    <com.scompt.megaview.library.MegaView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/megaview"
+        android:layout_above="@id/connectivity_group"
+        />
+</RelativeLayout>
