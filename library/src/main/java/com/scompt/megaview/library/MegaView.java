@@ -62,8 +62,7 @@ public class MegaView<T, U extends MegaView.ViewHolder> extends FrameLayout {
     private View emptyView;
     private boolean mConnected = true;
     private boolean mDebug;
-
-
+    private int mFirstPage = 0;
 
     public MegaView(Context context) {
         super(context);
@@ -89,6 +88,10 @@ public class MegaView<T, U extends MegaView.ViewHolder> extends FrameLayout {
     @SuppressWarnings("UnusedDeclaration")
     public void setSupportsPullToRefresh(boolean supportsPullToRefresh) {
         mSwipeRefreshLayout.setEnabled(supportsPullToRefresh);
+    }
+
+    public void setFirstPage(int firstPage) {
+        this.mFirstPage = firstPage;
     }
 
     public void setConnected(boolean connected) {
@@ -122,7 +125,7 @@ public class MegaView<T, U extends MegaView.ViewHolder> extends FrameLayout {
         mItems.clear();
         adapter.notifyItemRangeRemoved(0, itemCount);
         mSwipeRefreshLayout.setRefreshing(false);
-        mCurrentPage = 0;
+        mCurrentPage = mFirstPage;
         load();
     }
 
@@ -295,7 +298,7 @@ public class MegaView<T, U extends MegaView.ViewHolder> extends FrameLayout {
             mItems.clear();
             adapter.notifyItemRangeRemoved(0, itemCount);
             mSwipeRefreshLayout.setRefreshing(false);
-            mCurrentPage = 0;
+            mCurrentPage = mFirstPage;
             load();
         }
     }
